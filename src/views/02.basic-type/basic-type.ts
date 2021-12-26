@@ -101,8 +101,36 @@
 
 // let prettySure: Object = 4;
 // prettySure.toFixed(); // Property 'toFixed' does not exist on type 'Object'.
-let array: any[] = [1, "2", true]
+// let array: any[] = [1, "2", true]
 
-console.log(array[2]) // true
+// console.log(array[2]) // true
 
+// Never
 
+// // 返回Never的函数必须在无法达到的终点
+// function error(message: string): never {
+//     throw new Error(message)
+// }
+
+// // 推断的返回值类型为never
+// function fail() {
+//     return error("Something failed")
+// }
+
+// // 返回Never的函数必须在无法达到的终点
+// function infiniteLoop(): never {
+//     while (true) {
+
+//     }
+// }
+
+// Object
+declare function create(o: object | null): void
+
+create({ prop: 0 }) // OK
+create(null) // OK
+
+create(1) // Error
+create("string") // Error
+create(false) // Error
+create(undefined) // Error

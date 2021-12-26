@@ -76,7 +76,7 @@ console.log(username) // typescript
 
 上面代码声明一个变量`username`，该变量的类型为`string`，给变量赋初值为`"typescript"`，然后编译输出为`"typescript"`。
 
-同样的，这里也可以结合`ES6`的模板字符串，用它来定义多行文本和内嵌表达式。模板字符串**使用（` `）**表示，并且以`${expr}`嵌入表达式。
+同样的，这里也可以结合`ES6`的模板字符串，用它来定义多行文本和内嵌表达式。模板字符串使用` `` `表示，并且以`${expr}`嵌入表达式。
 
 ```ts
 let username: string = `typescript`
@@ -88,23 +88,6 @@ console.log(description) // typescript已经发展将近10年了
 上面代码声明了三个模板字符串，分别是`username`、`age`、`description`，通过模板字符串将他们构建在一起，最后编译输出`typescript已经发展将近10年了`。
 
 ![typescript](https://raw.githubusercontent.com/dpy0912/PicGo/main/images/Roaming/picgo/2021/12/24/9015a5013cd8cca9fb22dd2342e54af2-20211224195454-223152.png)
-
-### void类型
-
-`JavaScript`没有空值这个概念，在`TypeScript`中，可以使用`void`表示没有任何返回值的函数。
-
-声明一个`void`类型的变量，你就可以将它赋值为`null`和`undefined`。
-
-```ts
-function getName(username: string): void {
-    console.log("my name is " + username)
-}
-
-let username: string = "typescript"
-getName(username)
-```
-
-上面代码中，编写了一个`getName`函数，并且函数设置有参数`username`为`string`，并且将该返回值设置为`void`，通过传参给该函数，最后输出`my name is typescript`。
 
 ### Null和undefined
 
@@ -120,61 +103,6 @@ let u: undefined = undefined
 与`void`不同的是，`null`和`undefined`是所有类型的子类型，`null`和`undefined`声明的变量可以赋值给`number`类型的变量。
 
 然而，当你指定了`--strictNullChecks`标记，`null`和`undefined`只能赋值给`void`和它们各自。 这能避免 很多常见的问题。 也许在某处你想传入一个`string`或`null`或`undefined`，你可以使用联合类型**string | null | undefined**。
-
-### 数组
-
-`TypeScript`像`JavaScript`一样可以操作数组元素，有两种方法可以定义数组，第一种是，可以在元素后面跟上`[]`，表示由类型元素组成的数组。
-
-```ts
-let arrayNumber: number[] = [1, 2, 3]
-
-let arrayString: string[] = ["1", "2"]
-```
-
-上面代码所声明是变量`arrayNumber`是一个类型为`number`的数组`array`，数组内部元素只能是`number`类型的，而另外一个数组`arrayString`是定义类型为`string`的数组，该数组元素只能是字符串类型。
-
-第二种方式就是使用数组泛型，`Array<元素类型>`。
-
-```ts
-let array: Array<number> = [1, 2, 3]
-console.log(array) // [ 1, 2, 3 ]
-```
-
-![Array<number>](https://raw.githubusercontent.com/dpy0912/PicGo/main/images/Roaming/picgo/2021/12/24/3e97128ee398934219a514bd5e761f50-20211224204655-f01886.png)
-
-### 元组Tuple
-
-元组数据允许表示一个已知元素数量和数据类型的数组，各元素类型可以不必相同，比如，你可以定义一对键值对分别为`string`和`number`类型元组。
-
-```ts
-let array: [number, string]
-array = [1, "2"]
-console.log(array) // [ 1, '2' ]
-```
-
-上面代码中，声明一个元组`array`，该元组只有两个元素，并且分别是`number`和`string`，如果在赋值的时候，不按照对应的位置进行赋值，那么就会报错。比如下面的代码。
-
-```ts
-let array: [number, string]
-array = [1, 2]
-console.log(array) // Type 'string' is not assignable to type 'number'
-```
-
-当我们访问某个元素时，会得到正确的类型。
-
-```ts
-let array: [number, string]
-array = [1, "2"]
-if (typeof array[0] === "number") {
-    console.log(array[0])
-}
-
-if (typeof array[1] === "string") {
-    console.log(array[1])
-}
-```
-
-上面代码中，通过数组索引访问数组成员，使用`typeof`类型判断函数，当**typeof array[0] === "number"**为真时，就会输出元组第一个元素`1`，当**typeof array[1] === "string"**为真时，输出第二个数组元素`'2'`。这样就做到了类型判断。
 
 ### 枚举
 
@@ -256,4 +184,121 @@ prettySure.toFixed(); // Property 'toFixed' does not exist on type 'Object'.
 let array: any[] = [1, "2", true]
 
 console.log(array[2]) // true
+```
+
+### Never
+
+`Never`类型表示的是那些永不存在的值的类型。例如，`Never`总是会抛出异常或者根本就不会有返回值的函数表达式或者箭头函数表达式的返回值类型，变量可能是`Never`类型，当它们被永不为真的类型所约束时。
+
+`Never`类型是任何类型的子类型，也可以赋值给任何类型。然而，没有类型是`Never`的子类型或可以赋值给`Never`类型（除了`Never`本身之外）。 即使`Any`也不可以赋值给`Never`。
+
+```ts
+// 返回Never的函数必须在无法达到的终点
+function error(message: string): never {
+    throw new Error(message)
+}
+
+// 推断的返回值类型为never
+function fail() {
+    return error("Something failed")
+}
+
+// 返回Never的函数必须在无法达到的终点
+function infiniteLoop(): never {
+    while (true) {
+
+    }
+}
+```
+
+## 引用数据类型
+
+### 数组
+
+`TypeScript`像`JavaScript`一样可以操作数组元素，有两种方法可以定义数组，第一种是，可以在元素后面跟上`[]`，表示由类型元素组成的数组。
+
+```ts
+let arrayNumber: number[] = [1, 2, 3]
+
+let arrayString: string[] = ["1", "2"]
+```
+
+上面代码所声明是变量`arrayNumber`是一个类型为`number`的数组`array`，数组内部元素只能是`number`类型的，而另外一个数组`arrayString`是定义类型为`string`的数组，该数组元素只能是字符串类型。
+
+第二种方式就是使用数组泛型，`Array<元素类型>`。
+
+```ts
+let array: Array<number> = [1, 2, 3]
+console.log(array) // [ 1, 2, 3 ]
+```
+
+![Array<number>](https://raw.githubusercontent.com/dpy0912/PicGo/main/images/Roaming/picgo/2021/12/24/3e97128ee398934219a514bd5e761f50-20211224204655-f01886.png)
+
+### 元组Tuple
+
+元组数据允许表示一个已知元素数量和数据类型的数组，各元素类型可以不必相同，比如，你可以定义一对键值对分别为`string`和`number`类型元组。
+
+```ts
+let array: [number, string]
+array = [1, "2"]
+console.log(array) // [ 1, '2' ]
+```
+
+上面代码中，声明一个元组`array`，该元组只有两个元素，并且分别是`number`和`string`，如果在赋值的时候，不按照对应的位置进行赋值，那么就会报错。比如下面的代码。
+
+```ts
+let array: [number, string]
+array = [1, 2]
+console.log(array) // Type 'string' is not assignable to type 'number'
+```
+
+当我们访问某个元素时，会得到正确的类型。
+
+```ts
+let array: [number, string]
+array = [1, "2"]
+if (typeof array[0] === "number") {
+    console.log(array[0])
+}
+
+if (typeof array[1] === "string") {
+    console.log(array[1])
+}
+```
+
+上面代码中，通过数组索引访问数组成员，使用`typeof`类型判断函数，当**typeof array[0] === "number"**为真时，就会输出元组第一个元素`1`，当**typeof array[1] === "string"**为真时，输出第二个数组元素`'2'`。这样就做到了类型判断。
+
+### void类型
+
+`JavaScript`没有空值这个概念，在`TypeScript`中，可以使用`void`表示没有任何返回值的函数。
+
+声明一个`void`类型的变量，你就可以将它赋值为`null`和`undefined`。
+
+```ts
+function getName(username: string): void {
+    console.log("my name is " + username)
+}
+
+let username: string = "typescript"
+getName(username)
+```
+
+上面代码中，编写了一个`getName`函数，并且函数设置有参数`username`为`string`，并且将该返回值设置为`void`，通过传参给该函数，最后输出`my name is typescript`。
+
+### Object
+
+`Object`类型称为对象，是引用数据类型，表示非原始数据。
+
+使用`Object`类型，就可以很好的表示像`Object.create`这样的`API`。
+
+```ts
+declare function create(o: object | null): void
+
+create({ prop: 0 }) // OK
+create(null) // OK
+
+create(1) // Error
+create("string") // Error
+create(false) // Error
+create(undefined) // Error
 ```
