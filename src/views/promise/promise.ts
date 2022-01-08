@@ -10,6 +10,34 @@ interface PromiseConstructor {
 
     reject<T = never>(reason?: any): Promise<T>
 
+    all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>]): Promise<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
+
+    all<T1, T2, T3, T4, T5, T6, T7, T8, T9>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>]): Promise<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
+
+    all<T1, T2, T3, T4, T5, T6, T7, T8>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>]): Promise<[T1, T2, T3, T4, T5, T6, T7, T8]>;
+
+    all<T1, T2, T3, T4, T5, T6, T7>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>]): Promise<[T1, T2, T3, T4, T5, T6, T7]>;
+
+    all<T1, T2, T3, T4, T5, T6>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>]): Promise<[T1, T2, T3, T4, T5, T6]>;
+
+    all<T1, T2, T3, T4, T5>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>]): Promise<[T1, T2, T3, T4, T5]>;
+
+    all<T1, T2, T3, T4>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>]): Promise<[T1, T2, T3, T4]>;
+
+    all<T1, T2, T3>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>]): Promise<[T1, T2, T3]>;
+
+    all<T1, T2>(values: readonly [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>]): Promise<[T1, T2]>;
+
+    all<T>(values: readonly (T | PromiseLike<T>)[]): Promise<T[]>;
+    // 看着有点多，其实上面都是表示传入参数是一个数组的情况，这样写是因为传入的 Promise<T> 中的 T 可能不同而重载不同元组类型
+
+    // see: lib.es2015.iterable.d.ts
+    all<T>(values: Iterable<T | PromiseLike<T>>): Promise<T[]>;
+
+    race<T>(values: readonly T[]): Promise<T extends PromiseLink<infer U> ? U : T>
+
+    race<T>(values: Iterable<T>): Promise<T extends PromiseLink<infer U> ? U : T>
+
     new <T>(executor: (
         resolve: (value?: T | PromiseLink<T>) => void,
         reject: (reason?: any) => void) => void): Promise<T>
@@ -181,6 +209,79 @@ class MyPromise<T> {
     public catch<result = never>(onrejected?: onRejected<result>): MyPromise<T | result> {
         return this.then(null, onrejected)
     }
+
+    // all
+    static all<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+        values: readonly [
+            T1 | PromiseLike<T1>,
+            T2 | PromiseLike<T2>,
+            T3 | PromiseLike<T3>,
+            T4 | PromiseLike<T4>,
+            T5 | PromiseLike<T5>,
+            T6 | PromiseLike<T6>,
+            T7 | PromiseLike<T7>,
+            T8 | PromiseLike<T8>,
+            T9 | PromiseLike<T9>,
+            T10 | PromiseLike<T10>
+        ]
+    ): MyPromise<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>
+
+    static all<T>(values: Iterable<T | PromiseLike<T>>): MyPromise<T[]>
+
+    static all<T>(values: Iterable<T | PromiseLike<T>>): MyPromise<T[]> {
+        return new MyPromise((resolve, reject) => {
+            const resultArr: T[] = []
+            const doneArr: boolean[] = []
+            let iter = values[Symbol.iterator]()
+            let cur = iter.next()
+            const resolveResult = (value: T, index: number, done?: boolean) => {
+                resultArr[index] = value
+                doneArr[index] = true
+                if (done && doneArr.every((item) => item)) {
+                    resolve(resultArr)
+                }
+            }
+            for (let i = 0; !cur.done; i++) {
+                const value = cur.value
+                doneArr.push(false)
+                cur = iter.next()
+                if (isPromise(value)) {
+                    value.then((value: T) => {
+                        resolveResult(value, i, cur.done)
+                    }, reject)
+                } else {
+                    resolveResult(value, i, cur.done)
+                }
+            }
+        })
+    }
+
+    // race
+    static race<T>(
+        values: Iterable<T>
+    ): MyPromise<T extends PromiseLike<infer U> ? U : T>
+
+    static race<T>(
+        values: readonly T[]
+    ): MyPromise<T extends PromiseLike<infer U> ? U : T>
+
+    static race<T>(
+        values: Iterable<T>
+    ): MyPromise<T extends PromiseLike<infer U> ? U : T> {
+        return new MyPromise((resolve, reject) => {
+            const iter = values[Symbol.iterator]()
+            let cur = iter.next()
+            while (!cur.done) {
+                const value = cur.value
+                cur = iter.next()
+                if (isPromise(value)) {
+                    value.then(resolve, reject)
+                } else {
+                    resolve(value as T extends PromiseLike<infer U> ? U : T)
+                }
+            }
+        })
+    }
 }
 
 // 链式调用
@@ -261,19 +362,31 @@ function resolvePromise<T>(
 //     }
 // )
 
-const promise2 = new MyPromise<void>((resolve, reject) => {
-    resolve()
-}).catch(() => {
-    console.log(1)
-})
+// const promise2 = new MyPromise<void>((resolve, reject) => {
+//     resolve()
+// }).catch(() => {
+//     console.log(1)
+// })
 
-promise2.then(() => {
-    return "step1"
-}).then((res) => {
-    return res + ":" + "setp2"
-}).then((res) => {
-    console.log(res) // step1:setp2
-})
+// promise2.then(() => {
+//     return "step1"
+// }).then((res) => {
+//     return res + ":" + "setp2"
+// }).then((res) => {
+//     console.log(res) // step1:setp2
+// })
+
+const promise1 = MyPromise.resolve(3);
+const promise2 = 42;
+const promise3 = new MyPromise((resolve, reject) => {
+    setTimeout(() => {
+        resolve("foo")
+    }, 100);
+});
+
+MyPromise.all([promise2, promise3]).then((values) => {
+    console.log(values);
+});
 
 
 
